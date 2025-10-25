@@ -1,14 +1,21 @@
 class Solution {
     public int totalMoney(int n) {
-        int weekStart = 1;  
+        int dol = 1;
+        int reset = 1;
         int ans = 0;
+        int day = 0; // to count days
 
         while (n > 0) {
-            for (int day = 0; day < 7 && n > 0; day++) {
-                ans += weekStart + day;
-                n--;
+            ans += dol;
+            dol++;
+            n--;
+            day++;
+
+            // after every 7 days, start a new week
+            if (day % 7 == 0) {
+                reset++;
+                dol = reset;
             }
-            weekStart++;
         }
         return ans;
     }
