@@ -13,52 +13,83 @@
  *     }
  * }
  */
-class Solution {
-    private Map<Integer, List<Integer>> adjacencyList = new HashMap<>();
 
-    public int amountOfTime(TreeNode root, int start) {
-        convertToGraph(root);
-        Deque<Integer> queue = new ArrayDeque<>();
-        Set<Integer> visited = new HashSet<>();
-      
-        queue.offer(start);
-        int time = -1; 
-      
-        while (!queue.isEmpty()) {
-            time++;
-            for (int i = queue.size(); i > 0; i--) {
-                int currentNode = queue.pollFirst();
-                visited.add(currentNode);
-              
-                if (adjacencyList.containsKey(currentNode)) {
-                    for (int neighbor : adjacencyList.get(currentNode)) {
-                        if (!visited.contains(neighbor)) {
-                            queue.offer(neighbor);
-                        }
-                    }
-                }
-            }
+import java.util.*;
+
+class Solution {
+
+    public TreeNode solve(TreeNode root, int start, Map<TreeNode, TreeNode> parentMap) {
+
+        if (root == null) return null;
+        if (root.val == start) return root;
+
+        TreeNode leftAns = null;
+        TreeNode rightAns = null;
+
+        if (root.left != null) {
+            parentMap.put(root.left, root);
+            leftAns = solve(root.left, start, parentMap);
         }
-        return time;
+
+        if (root.right != null) {
+            parentMap.put(root.right, root);
+            rightAns = solve(root.right, start, parentMap);
+        }
+
+        if (leftAns != null) return leftAns;
+        if (rightAns != null) return rightAns;
+
+        return null;
     }
 
-    private void convertToGraph(TreeNode node) {
-        if (node == null) {
-            return;
+    public int amountOfTime(TreeNode root, int start) {
+
+        Map<TreeNode, TreeNode> parentMap = new HashMap<>();
+        TreeNode startNode = solve(root, start, parentMap);
+
+        parentMap.put(root, null);
+
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(startNode);
+
+        Map<TreeNode, Integer> visited = new HashMap<>();
+        visited.put(startNode, 1);
+
+        int time = 0;
+
+        while (!queue.isEmpty()) {
+
+            int size = queue.size();
+            boolean check = false;
+
+            for (int i = 0; i < size; i++) {
+
+                TreeNode current = queue.poll();
+
+                if (current.left != null && !visited.containsKey(current.left)) {
+                    queue.offer(current.left);
+                    visited.put(current.left, 1);
+                    check = true;
+                }
+
+                if (current.right != null && !visited.containsKey(current.right)) {
+                    queue.offer(current.right);
+                    visited.put(current.right, 1);
+                    check = true;
+                }
+
+                TreeNode parent = parentMap.get(current);
+
+                if (parent != null && !visited.containsKey(parent)) {
+                    queue.offer(parent);
+                    visited.put(parent, 1);
+                    check = true;
+                }
+            }
+
+            if (check) time++;
         }
-      
-        if (node.left != null) {
-            adjacencyList.computeIfAbsent(node.val, k -> new ArrayList<>()).add(node.left.val);
-            adjacencyList.computeIfAbsent(node.left.val, k -> new ArrayList<>()).add(node.val);
-        }
-      
-        if (node.right != null) {
-            adjacencyList.computeIfAbsent(node.val, k -> new ArrayList<>()).add(node.right.val);
-            adjacencyList.computeIfAbsent(node.right.val, k -> new ArrayList<>()).add(node.val);
-        }
-      
-        
-        convertToGraph(node.left);
-        convertToGraph(node.right);
+
+        return time;
     }
 }
