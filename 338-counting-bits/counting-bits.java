@@ -1,11 +1,20 @@
 class Solution {
-    public int[] countBits(int n) {
-        int[] result = new int[n + 1];
+    int solve(int x){
+        int cnt=0;
 
-        for (int i = 1; i <= n; i++) {
-            result[i] = result[i / 2] + (i % 2);
+        while(x>0){
+            cnt+=x & 1;
+            x>>=1;
         }
+        return cnt;
+    }
 
-        return result;
+    public int[] countBits(int n) {
+        int[] res = new int[n+1];
+
+        for(int i=0; i<n+1; i++){
+            res[i]+=solve(i);
+        }
+        return res;
     }
 }
